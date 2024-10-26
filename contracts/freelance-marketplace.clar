@@ -226,3 +226,28 @@
         (ok true)
     )
 )
+
+;; Rating System Functions
+
+(define-public (rate-user (user principal) (rating uint))
+    (let
+        (
+            (current-rating (default-to
+                { total-rating: u0, number-of-ratings: u0, average-rating: u0 }
+                (map-get? user-ratings { user: user })
+            ))
+        )
+        (asserts! (and (>= rating u1) (<= rating u5)) (err u106))
+
+        (map-set user-ratings
+            { user: user }
+            {
+                total-rating: (+ (get total-rating current-rating) rating),
+                number-of-ratings: (+ (get number-of-ratings current-rating) u1),
+                average-rating: (/ (+ (get total-rating current-rating) rating)
+                                 (+ (get number-of-ratings current-rating) u1))
+            }
+        )
+        (ok true)
+    )
+)
