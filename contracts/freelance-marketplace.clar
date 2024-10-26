@@ -251,3 +251,21 @@
         (ok true)
     )
 )
+
+;; Read-only Functions
+
+(define-read-only (get-job-details (job-id uint))
+    (map-get? jobs { job-id: job-id })
+)
+
+(define-read-only (get-user-rating (user principal))
+    (map-get? user-ratings { user: user })
+)
+
+(define-read-only (get-bids-for-job (job-id uint))
+    (map-get? bids { job-id: job-id })
+)
+
+(define-read-only (get-dispute-details (job-id uint))
+    (map-get? disputes { job-id: job-id })
+)
