@@ -62,3 +62,36 @@
 (define-constant ERR-INSUFFICIENT-FUNDS (err u103))
 (define-constant ERR-ALREADY-BIDDED (err u104))
 (define-constant ERR-DISPUTE-EXISTS (err u105))
+
+;; Job Management Functions
+
+(define-public (post-job (title (string-utf8 100)) (description (string-utf8 500)) (budget uint) (milestones (list 10 uint)))
+    (let
+        (
+            (job-id (+ (var-get job-counter) u1))
+        )
+        (try! (stx-transfer? budget tx-sender (as-contract tx-sender)))
+        (map-set jobs
+            { job-id: job-id }
+            {
+                client: tx-sender,
+                title: title,
+                description: description,
+                budget: budget,
+                status: "open",
+                freelancer: none,
+                milestones: milestones,
+                current-milestone: u0
+            }
+        )
+        (var-set job-counter job-id)
+        (map-set escrow
+            { job-id: job-id }
+            {
+                amount: budget,
+                locked: true
+            }
+        )
+        (ok job-id)
+    )
+)
