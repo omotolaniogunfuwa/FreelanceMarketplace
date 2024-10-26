@@ -208,3 +208,21 @@
         (ok true)
     )
 )
+
+(define-public (vote-on-dispute (job-id uint) (vote-release bool))
+    (let
+        (
+            (dispute (unwrap! (map-get? disputes { job-id: job-id }) (err u404)))
+        )
+        (asserts! (not (get resolved dispute)) ERR-INVALID-STATUS)
+
+        (map-set disputes
+            { job-id: job-id }
+            (merge dispute {
+                votes-release: (if vote-release (+ (get votes-release dispute) u1) (get votes-release dispute)),
+                votes-refund: (if (not vote-release) (+ (get votes-refund dispute) u1) (get votes-refund dispute))
+            })
+        )
+        (ok true)
+    )
+)
