@@ -115,3 +115,27 @@
         (ok true)
     )
 )
+
+(define-public (accept-bid (job-id uint) (freelancer principal))
+    (let
+        (
+            (job (unwrap! (map-get? jobs { job-id: job-id }) (err u404)))
+            (bid (unwrap! (map-get? bids { job-id: job-id, bidder: freelancer }) (err u404)))
+        )
+        (asserts! (is-eq tx-sender (get client job)) ERR-NOT-AUTHORIZED)
+        (asserts! (is-eq (get status job) "open") ERR-INVALID-STATUS)
+
+        (map-set jobs
+            { job-id: job-id }
+            (merge job {
+                status: "in-progress",
+                freelancer: (some freelancer)
+            })
+        )
+        (map-set bids
+            { job-id: job-id, bidder: freelancer }
+            (merge bid { status: "accepted" })
+        )
+        (ok true)
+    )
+)
