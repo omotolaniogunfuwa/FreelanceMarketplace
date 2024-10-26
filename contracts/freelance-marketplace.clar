@@ -177,3 +177,34 @@
         (ok true)
     )
 )
+
+;; Dispute Resolution Functions
+
+(define-public (raise-dispute (job-id uint) (reason (string-utf8 500)))
+    (let
+        (
+            (job (unwrap! (map-get? jobs { job-id: job-id }) (err u404)))
+        )
+        (asserts! (or
+            (is-eq tx-sender (get client job))
+            (is-eq tx-sender (unwrap! (get freelancer job) ERR-NOT-AUTHORIZED))
+        ) ERR-NOT-AUTHORIZED)
+        (asserts! (is-none (map-get? disputes { job-id: job-id })) ERR-DISPUTE-EXISTS)
+
+        (map-set disputes
+            { job-id: job-id }
+            {
+                initiator: tx-sender,
+                reason: reason,
+                votes-release: u0,
+                votes-refund: u0,
+                resolved: false
+            }
+        )
+        (map-set jobs
+            { job-id: job-id }
+            (merge job { status: "disputed" })
+        )
+        (ok true)
+    )
+)
