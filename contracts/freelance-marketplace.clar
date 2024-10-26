@@ -95,3 +95,23 @@
         (ok job-id)
     )
 )
+
+(define-public (place-bid (job-id uint) (amount uint) (proposal (string-utf8 500)))
+    (let
+        (
+            (job (unwrap! (map-get? jobs { job-id: job-id }) (err u404)))
+        )
+        (asserts! (is-eq (get status job) "open") ERR-INVALID-STATUS)
+        (asserts! (is-none (map-get? bids { job-id: job-id, bidder: tx-sender })) ERR-ALREADY-BIDDED)
+
+        (map-set bids
+            { job-id: job-id, bidder: tx-sender }
+            {
+                amount: amount,
+                proposal: proposal,
+                status: "pending"
+            }
+        )
+        (ok true)
+    )
+)
